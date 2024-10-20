@@ -1,20 +1,61 @@
+{{- if .Values.homerWebApp.ingress.enabled -}}
+{{- $fullName := include "homer.fullname" . -}}
+{{- $svcPort := .Values.homerWebApp.service.port -}}
+{{- if and .Values.homerWebApp.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.homerWebApp.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.homerWebApp.ingress.annotations "kubernetes.io/ingress.class" .Values.homerWebApp.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
-  name: homer-webapp
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+  name: {{ $fullName }}-webapp
   labels:
-{{ include "common.labels" . | indent 4 }}
+    {{- include "homer.labels" . | nindent 4 }}
+  {{- with .Values.homerWebApp.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
+  {{- if and .Values.homerWebApp.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.homerWebApp.ingress.className }}
+  {{- end }}
+  {{- if .Values.homerWebApp.ingress.tls }}
+  tls:
+    {{- range .Values.homerWebApp.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
   rules:
-    - host: {{ required "hostname for the homer portal" .Values.homer.hostname }}
+    {{- range .Values.homerWebApp.ingress.hosts }}
+    - host: {{ .host | quote }}
       http:
         paths:
-        - backend:
-            service:
-              name: homer-webapp
-              port: 
-                number: 80
-          path: /
-          pathType: Prefix
-
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $fullName }}-webapp
+                port:
+                  number: {{ $svcPort }}
+              {{- else }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+              {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

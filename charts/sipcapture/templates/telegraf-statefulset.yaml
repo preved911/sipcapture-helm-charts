@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  name: {{ include "homer.fullname" . }}-telegraf
   labels:
-    app: telegraf
-{{ include "common.labels" . | indent 4 }}
-  name: telegraf
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: telegraf
 spec:
-  serviceName: telegraf
+  serviceName: {{ include "homer.fullname" . }}-telegraf
   replicas: 1
   selector:
     matchLabels:
-      app: telegraf
+      {{- include "homer.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: telegraf
   template:
     metadata:
-      name: telegraf
       labels:
-        app: telegraf
+        {{- include "homer.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: telegraf
     spec:
       containers:
         - image: {{ .Values.telegraf.image }}
@@ -26,13 +26,13 @@ spec:
           resources: {}
           volumeMounts:
             - mountPath: /etc/telegraf/telegraf.conf
-              name: telegraf-conf
+              name: config
               subPath: telegraf.conf
       restartPolicy: Always
       volumes:
-      - name: telegraf-conf
+      - name: config
         configMap:
-          name: telegraf-conf
+          name: {{ include "homer.fullname" . }}-telegraf
           items:
           - key: telegraf.conf
             path: telegraf.conf

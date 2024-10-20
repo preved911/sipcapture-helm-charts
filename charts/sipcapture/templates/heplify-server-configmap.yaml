@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
-  name: heplify-server-conf
+  name: {{ include "homer.fullname" . }}-heplify-server
   labels:
-{{ include "common.labels" . | indent 4 }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: heplify-server
 data:
   heplify-server.toml: |
     HEPAddr               = "0.0.0.0:9060"
@@ -24,11 +24,11 @@ data:
     PromTargetName        = ""
     DBShema               = "homer7"
     DBDriver              = "postgres"
-    DBAddr                = "postgres:5432"
-    DBUser                = "root"
-    DBPass                = "homerSeven"
-    DBDataTable           = "homer_data"
-    DBConfTable           = "homer_config"
+    DBAddr                = "{{ printf "%s:%d" .Values.heplifyServer.database.host (.Values.heplifyServer.database.port|int) }}"
+    DBUser                = "{{ .Values.heplifyServer.database.user }}"
+    DBPass                = "{{ .Values.heplifyServer.database.pass }}"
+    DBDataTable           = "{{ .Values.heplifyServer.database.name }}"
+    DBConfTable           = "{{ .Values.homerWebApp.database.name }}"
     DBBulk                = 200
     DBTimer               = 4
     DBBuffer              = 400000

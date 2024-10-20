@@ -1,10 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
-  name: webapp-conf
+  name: {{ include "homer.fullname" . }}-webapp
   labels:
-{{ include "common.labels" . | indent 4 }}
+    {{- include "homer.labels" . | nindent 4 }}
 data:
   bootstrapped: |
     bootstrapping
@@ -17,22 +16,24 @@ data:
       },
       "database_config": {
         "help": "Settings for PGSQL Database (settings)",
-        "host": "postgres",
+        "host": "{{ .Values.homerWebApp.database.host }}",
+        "port": "{{ .Values.homerWebApp.database.port }}",
         "keepalive": true,
-        "name": "homer_config",
+        "name": "{{ .Values.homerWebApp.database.name }}",
         "node": "LocalConfig",
-        "pass": "homerSeven",
-        "user": "root"
+        "pass": "{{ .Values.homerWebApp.database.pass }}",
+        "user": "{{ .Values.homerWebApp.database.user }}"
       },
       "database_data": {
         "localnode": {
           "help": "Settings for PGSQL Database (data)",
-          "host": "postgres",
+          "host": "{{ .Values.heplifyServer.database.host }}",
+          "port": "{{ .Values.heplifyServer.database.port }}",
           "keepalive": true,
-          "name": "homer_data",
+          "name": "{{ .Values.heplifyServer.database.name }}",
           "node": "LocalNode",
-          "pass": "homerSeven",
-          "user": "root"
+          "pass": "{{ .Values.heplifyServer.database.pass }}",
+          "user": "{{ .Values.heplifyServer.database.user }}"
         }
       },
       "decoder_shark": {

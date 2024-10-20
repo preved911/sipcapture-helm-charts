@@ -1,21 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: heplify-server
+  name: {{ include "homer.fullname" . }}-heplify-server
   labels:
-    app: heplify-server
-{{ include "common.labels" . | indent 4 }}
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: heplify-server
 spec:
-  serviceName: heplify-server
+  serviceName: {{ include "homer.fullname" . }}-heplify-server
   replicas: 1
   selector:
     matchLabels:
-      app: heplify-server
+      {{- include "homer.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: heplify-server
   template:
     metadata:
       labels:
-        app: heplify-server
+        {{- include "homer.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: heplify-server
     spec:
       containers:
         - name: heplify-server
@@ -29,12 +30,12 @@ spec:
           resources: {}
           volumeMounts:
             - mountPath: /etc/heplify-server.toml
-              name: heplify-server-conf
+              name: config
               subPath: heplify-server.toml
       volumes:
-      - name: heplify-server-conf
+      - name: config
         configMap:
-          name: heplify-server-conf
+          name: {{ include "homer.fullname" . }}-heplify-server
           items:
           - key: heplify-server.toml
             path: heplify-server.toml

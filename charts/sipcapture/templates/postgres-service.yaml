@@ -1,16 +1,18 @@
+{{- if .Values.postgres.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ include "homer.fullname" . }}-postgres
   labels:
-    app: postgres
-{{ include "common.labels" . | indent 4 }}
-  name: postgres
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
 spec:
   ports:
     - name: "postgres"
       port: 5432
       targetPort: 5432
   selector:
-    app: postgres
+    {{- include "homer.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
   clusterIP: None
+{{- end }}

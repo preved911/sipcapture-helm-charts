@@ -1,22 +1,23 @@
+{{- if .Values.postgres.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  name: {{ include "homer.fullname" . }}-postgres
   labels:
-    app: postgres
-{{ include "common.labels" . | indent 4 }}
-  name: postgres
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
 spec:
-  serviceName: postgres
+  serviceName: {{ include "homer.fullname" . }}-postgres
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      {{- include "homer.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgres
   template:
     metadata:
-      name: postgres
       labels:
-        app: postgres
+        {{- include "homer.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: postgres
     spec:
       containers:
         - image: {{ .Values.postgres.image }}
@@ -41,3 +42,4 @@ spec:
       resources:
         requests:
           storage: {{ .Values.postgres.storage }}
+{{- end }}

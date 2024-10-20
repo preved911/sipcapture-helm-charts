@@ -1,10 +1,11 @@
+{{- if .Values.grafana.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
-  name: grafana-provisioning
+  name: {{ include "homer.fullname" . }}-grafana
   labels:
-{{ include "common.labels" . | indent 4 }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
 data:
   default-dashboard.yaml: |
     apiVersion: 1
@@ -3100,3 +3101,4 @@ data:
       "version": 2,
       "weekStart": ""
     }
+{{- end }}

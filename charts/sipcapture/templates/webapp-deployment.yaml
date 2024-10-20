@@ -1,45 +1,48 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{ include "homer.fullname" . }}-webapp
   labels:
-    app: homer-webapp
-{{ include "common.labels" . | indent 4 }}
-  name: homer-webapp
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webapp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: homer-webapp
+      {{- include "homer.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: webapp
   template:
     metadata:
       labels:
-        app: homer-webapp
+        {{- include "homer.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: webapp
     spec:
       containers:
-        - name: homer-webapp
-          image: {{ .Values.homer.image }}
+        - name: webapp
+          image: {{ .Values.homerWebApp.image }}
           ports:
             - containerPort: 80
           resources: {}
           env:
             - name: DB_HOST
-              value: postgres
+              value: {{ .Values.homerWebApp.database.host }}
+            - name: DB_PORT
+              value: {{ .Values.homerWebApp.database.port|quote }}
             - name: DB_USER
-              value: {{ .Values.postgres.user | quote }}
+              value: {{ .Values.homerWebApp.database.user }}
             - name: DB_PASS
-              value: {{ .Values.postgres.password | quote }}
+              value: {{ .Values.homerWebApp.database.password }}
           volumeMounts:
             - mountPath: /usr/local/homer/etc/webapp_config.json
-              name: webapp-conf
+              name: config
               subPath: webapp_config.json
             - mountPath: /homer-semaphore/.bootstrapped
-              name: webapp-conf
+              name: config
               subPath: bootstrapped
       volumes:
-      - name: webapp-conf
+      - name: config
         configMap:
-          name: webapp-conf
+          name: {{ include "homer.fullname" . }}-webapp
           items:
           - key: webapp_config.json
             path: webapp_config.json          

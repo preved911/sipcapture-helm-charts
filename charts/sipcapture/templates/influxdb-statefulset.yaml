@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  name: {{ include "homer.fullname" . }}-influxdb
   labels:
-    app: influxdb
-{{ include "common.labels" . | indent 4 }}
-  name: influxdb
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: influxdb
 spec:
-  serviceName: influxdb
+  serviceName: {{ include "homer.fullname" . }}-influxdb
   replicas: 1
   selector:
     matchLabels:
-      app: influxdb
+      {{- include "homer.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: influxdb
   template:
     metadata:
-      name: influxdb
       labels:
-        app: influxdb
+        {{- include "homer.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: influxdb
     spec:
       containers:
         - image: {{ .Values.influxdb.image }}

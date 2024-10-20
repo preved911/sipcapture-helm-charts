@@ -1,19 +1,88 @@
-grafana: 
+grafana:
+  enabled: true
   image: grafana/grafana-oss:latest 
-  hostname:
   storage: 2Gi
-heplifyServer: 
-  image: sipcapture/heplify-server:master
-influxdb: 
+
+  service:
+    type: ClusterIP
+    port: 3000
+
+  ingress:
+    enabled: false
+  
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+heplifyServer:
+  image: sipcapture/heplify-server:1.30
+
+  service:
+    type: ClusterIP
+    port: 9060
+
+  database:
+    host: postgres
+    port: 5432
+    user: root
+    pass: homerSeven
+    name: homer_data
+
+influxdb:
   image: influxdb:1.8
   loglevel: info
   storage: 10Gi
-homer: 
+
+homerWebApp:
   image: sipcapture/webapp:latest
-  hostname:
-postgres: 
+
+  ingress:
+    host: ""
+    className: ""
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: false
+  
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  database:
+    host: postgres
+    port: 5432
+    user: root
+    pass: homerSeven
+    name: homer_config
+
+postgres:
+  enabled: true
   image: postgres:11-alpine
-  storage: 30Gi 
-telegraf: 
+  storage: 30Gi
+
+telegraf:
   image: telegraf:1.19
 

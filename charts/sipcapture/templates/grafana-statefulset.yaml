@@ -1,22 +1,23 @@
+{{- if .Values.grafana.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
+  name: {{ include "homer.fullname" . }}-grafana
   labels:
-    app: grafana
-{{ include "common.labels" . | indent 4 }}
-  name: grafana
-  namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
+    {{- include "homer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
 spec:
-  serviceName: grafana
+  serviceName: {{ include "homer.fullname" . }}-grafana
   replicas: 1
   selector:
     matchLabels:
-      app: grafana
+      {{- include "homer.labels" . | nindent 6 }}
+      app.kubernetes.io/component: grafana
   template:
     metadata:
-      name: grafana
       labels:
-        app: grafana
+        {{- include "homer.labels" . | nindent 8 }}
+        app.kubernetes.io/component: grafana
     spec:
       securityContext:
           runAsUser: 472
@@ -64,7 +65,7 @@ spec:
       volumes:
       - name: grafana-provisioning
         configMap:
-          name: grafana-provisioning
+          name: {{ include "homer.fullname" . }}-grafana
           items:
           - key: datasource.yaml
             path: datasource.yaml
@@ -82,3 +83,4 @@ spec:
       resources:
         requests:
           storage: {{ .Values.grafana.storage }}
+{{- end }}
