@@ -1,19 +1,50 @@
-grafana: 
+grafana:
+  enabled: true
   image: grafana/grafana-oss:latest 
-  hostname:
+  hostname: ""
   storage: 2Gi
-heplifyServer: 
-  image: sipcapture/heplify-server:master
-influxdb: 
+
+heplifyServer:
+  image: sipcapture/heplify-server:1.30
+
+  service:
+    type: None
+    annotations: {}
+    # loadBalancerIP: ""
+
+  database:
+    host: postgres
+    port: 5432
+    user: root
+    pass: homerSeven
+    name: homer_data
+
+influxdb:
   image: influxdb:1.8
   loglevel: info
   storage: 10Gi
-homer: 
+
+homer:
   image: sipcapture/webapp:latest
-  hostname:
-postgres: 
+  hostname: ""
+
+  service:
+    type: ClusterIP
+    annotations: {}
+    # loadBalancerIP: ""
+
+  database:
+    host: postgres
+    port: 5432
+    user: root
+    pass: homerSeven
+    name: homer_config
+
+postgres:
+  enabled: true
   image: postgres:11-alpine
-  storage: 30Gi 
-telegraf: 
+  storage: 30Gi
+
+telegraf:
   image: telegraf:1.19
 

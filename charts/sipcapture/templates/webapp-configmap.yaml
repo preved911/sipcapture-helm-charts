@@ -17,22 +17,24 @@ data:
       },
       "database_config": {
         "help": "Settings for PGSQL Database (settings)",
-        "host": "postgres",
+        "host": "{{ .Values.homer.database.host }}",
+        "port": "{{ .Values.homer.database.port }}",
         "keepalive": true,
-        "name": "homer_config",
+        "name": "{{ .Values.homer.database.name }}",
         "node": "LocalConfig",
-        "pass": "homerSeven",
-        "user": "root"
+        "pass": "{{ .Values.homer.database.pass }}",
+        "user": "{{ .Values.homer.database.user }}"
       },
       "database_data": {
         "localnode": {
           "help": "Settings for PGSQL Database (data)",
-          "host": "postgres",
+          "host": "{{ .Values.heplifyServer.database.host }}",
+          "port": "{{ .Values.heplifyServer.database.port }}",
           "keepalive": true,
-          "name": "homer_data",
+          "name": "{{ .Values.heplifyServer.database.name }}",
           "node": "LocalNode",
-          "pass": "homerSeven",
-          "user": "root"
+          "pass": "{{ .Values.heplifyServer.database.pass }}",
+          "user": "{{ .Values.heplifyServer.database.user }}"
         }
       },
       "decoder_shark": {

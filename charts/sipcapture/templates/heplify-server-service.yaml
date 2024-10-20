@@ -4,6 +4,10 @@ metadata:
   labels:
     app: heplify-server
 {{ include "common.labels" . | indent 4 }}
+{{- with .Values.heplifyServer.service.annotations }}
+  annotations:
+    {{- . | indent 4 }}
+{{- end }}
   name: heplify-server
   namespace: {{ dig "global" "monitoring" "namespace" .Release.Namespace (.Values | merge (dict)) | quote }}
 spec:
@@ -18,4 +22,11 @@ spec:
       protocol: TCP
   selector:
     app: heplify-server
+{{- if .Values.heplifyServer.service.clusterIP }}
   clusterIP: None
+{{- else }}
+  type: {{ .Values.heplifyServer.service.type }}
+{{- end }}
+{{- if .Values.heplifyServer.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.heplifyServer.service.loadBalancerIP }}
+{{- end }}

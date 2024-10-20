@@ -24,11 +24,13 @@ spec:
           resources: {}
           env:
             - name: DB_HOST
-              value: postgres
+              value: {{ .Values.homer.database.host }}
+            - name: DB_PORT
+              value: {{ .Values.homer.database.port|quote }}
             - name: DB_USER
-              value: {{ .Values.postgres.user | quote }}
+              value: {{ .Values.homer.database.user }}
             - name: DB_PASS
-              value: {{ .Values.postgres.password | quote }}
+              value: {{ .Values.homer.database.password }}
           volumeMounts:
             - mountPath: /usr/local/homer/etc/webapp_config.json
               name: webapp-conf

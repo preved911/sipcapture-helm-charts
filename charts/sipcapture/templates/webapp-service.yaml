@@ -11,6 +11,9 @@ spec:
     - name: homer-webapp
       port: 80
       targetPort: 80
-  type: NodePort
   selector:
     app: homer-webapp
+  type: {{ .Values.homer.service.type }}
+{{- if .Values.homer.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.homer.service.loadBalancerIP }}
+{{- end }}

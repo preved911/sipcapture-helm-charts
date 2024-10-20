@@ -24,11 +24,11 @@ data:
     PromTargetName        = ""
     DBShema               = "homer7"
     DBDriver              = "postgres"
-    DBAddr                = "postgres:5432"
-    DBUser                = "root"
-    DBPass                = "homerSeven"
-    DBDataTable           = "homer_data"
-    DBConfTable           = "homer_config"
+    DBAddr                = "{{ printf "%s:%d" .Values.heplifyServer.database.host (.Values.heplifyServer.database.port|int) }}"
+    DBUser                = "{{ .Values.heplifyServer.database.user }}"
+    DBPass                = "{{ .Values.heplifyServer.database.pass }}"
+    DBDataTable           = "{{ .Values.heplifyServer.database.name }}"
+    DBConfTable           = "{{ .Values.homer.database.name }}"
     DBBulk                = 200
     DBTimer               = 4
     DBBuffer              = 400000
